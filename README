@@ -1,3 +1,11 @@
+Notice
+------
+
+This is a reduced version of https://github.com/redheli/ethercat which exports a cmake configuration to find_package everything.
+Only the eml-svn subfolder of the package is actually used for the PR2 robot, so I removed everything else and turned it into a top-level folder.
+
+Original README content below
+-----------------------------
 
 For building using the eCos OS:
 
