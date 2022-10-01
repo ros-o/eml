@@ -52,7 +52,7 @@ IF (BUILD_FOR_RTNET)
 ENDIF(BUILD_FOR_RTNET)
 
 IF (BUILD_FOR_POSIX)
-
+  include(GNUInstallDirs)
   FILE( GLOB posix_SRCS arch/posix/[^.]*.c)
   SET (eml_SRCS "${eml_SRCS};${posix_SRCS}")
   
@@ -63,7 +63,10 @@ IF (BUILD_FOR_POSIX)
     SET_TARGET_PROPERTIES(eml-static
       PROPERTIES OUTPUT_NAME eml LINK_FLAGS "${POSIX_USER_LDFLAGS}"
       CLEAN_DIRECT_OUTPUT 1)
-    INSTALL_TARGETS(/lib eml-static)
+    install(
+      TARGETS eml-static
+      EXPORT emlTargets
+      DESTINATION ${CMAKE_INSTALL_LIBDIR})
   ENDIF ( BUILD_STATIC )
 
   # Settings for building a dynamic library (.so/.dll)
@@ -73,24 +76,40 @@ IF (BUILD_FOR_POSIX)
     SET_TARGET_PROPERTIES(eml-dynamic
       PROPERTIES OUTPUT_NAME eml LINK_FLAGS "${POSIX_USER_LDFLAGS}"
       CLEAN_DIRECT_OUTPUT 1)
-    INSTALL_TARGETS(/lib eml-dynamic)
+    install(
+      TARGETS eml-dynamic
+      EXPORT emlTargets
+      DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    target_include_directories(eml-dynamic INTERFACE
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/eml>
+    )
   ENDIF (BUILD_DYNAMIC)
 
   # arch specific headers
   FILE( GLOB ARCH_POSIX_INCLS ${EML_SOURCE_DIR}/include/ethercat/arch-RTnet/ethercat/[^.]*.h )
-  INSTALL_FILES( /include/ethercat/ FILES ${ARCH_POSIX_INCLS})
+  install(FILES ${ARCH_POSIX_INCLS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/eml/ethercat/)
 
 ENDIF(BUILD_FOR_POSIX)
 
 
 # Also install header files
-FILE( GLOB AL_INCLS ${EML_SOURCE_DIR}/include/al/[^.]*.h )
-INSTALL_FILES( /include/al/ FILES ${AL_INCLS})
-FILE( GLOB DLL_INCLS ${EML_SOURCE_DIR}/include/dll/[^.]*.h )
-INSTALL_FILES( /include/dll/ FILES ${DLL_INCLS})
+FILE( GLOB AL_INCLS ${EML_SOURCE_DIR}/include/al/[^.]*.h)
+install(FILES ${AL_INCLS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/eml/al/)
+FILE( GLOB DLL_INCLS ${EML_SOURCE_DIR}/include/dll/[^.]*.h)
+install(FILES ${DLL_INCLS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/eml/dll/)
 #FILE( GLOB ETHERCAT_INCLS ${EML_SOURCE_DIR}/include/ethercat/[^.]*.h )
 #INSTALL_FILES( /include/ethercat/ FILES ${ETHERCAT_INCLS})
 
+install(EXPORT emlTargets
+    FILE EMLTargets.cmake
+    NAMESPACE eml::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/eml)
 
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "EMLConfigVersion.cmake"
+    VERSION 1.8.15
+    COMPATIBILITY AnyNewerVersion)
 
-
+install(FILES "EMLConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/EMLConfigVersion.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/eml)
