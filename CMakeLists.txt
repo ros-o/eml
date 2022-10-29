@@ -6,6 +6,7 @@
 # CMakeLists files in this project can refer to the root source
 # directory of the project as ${EML_SOURCE_DIR} and
 # to the root binary directory of the project as ${EML_BINARY_DIR}.
+cmake_minimum_required(VERSION 3.0)
 project (EML)
 
 OPTION( BUILD_FOR_ECOS "Build EML for the eCos OS" OFF)
